@@ -2,7 +2,9 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++17
+CONFIG += \
+        c++17 \
+	console
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -12,14 +14,16 @@ SOURCES += \
     Chess.cpp \
     GameManager.cpp \
     main.cpp \
-    viewer.cpp
+    viewer.cpp \
+    Board.cpp
 
 HEADERS += \
     Chess.h \
     GameManager.h \
     Header.h \
     Ma.h \
-    viewer.h
+    viewer.h \
+    Board.h
 
 FORMS += \
     viewer.ui

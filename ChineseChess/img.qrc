@@ -17,5 +17,7 @@
         <file>img/R_siang.png</file>
         <file>img/select.png</file>
         <file>img/Board-4.jpg</file>
+        <file>img/icon.png</file>
+        <file>img/canMove.png</file>
     </qresource>
 </RCC>

@@ -12,6 +12,8 @@ Viewer::Viewer(QWidget* parent)
 	, ui(new Ui::Viewer)
 {
 	ui->setupUi(this);
+	setWindowTitle("Chinese Chess");
+	setWindowIcon(QIcon(":/ChineseChess/img/icon.png"));
 }
 
 Viewer::~Viewer()
@@ -20,6 +22,7 @@ Viewer::~Viewer()
 }
 
 void Viewer::menu() {
+	Board::clearMove();
 	setFixedSize(300, 250);
 
 	title1 = new QLabel("中國象棋", this);
@@ -27,19 +30,25 @@ void Viewer::menu() {
 	title1->setGeometry(90, 20, 150, 30);
 
 	startBtn = new QPushButton("開始遊戲", this);
-	startBtn->setGeometry(90, 100, 120, 40);
+	startBtn->setGeometry(90, 80, 120, 40);
 	startBtn->setFlat(0);
 
+	loadBtn = new QPushButton("讀檔開始", this);
+	loadBtn->setGeometry(90, 130, 120, 40);
+	loadBtn->setFlat(0);
+
 	quitBtn = new QPushButton("結束遊戲", this);
-	quitBtn->setGeometry(90, 150, 120, 40);
+	quitBtn->setGeometry(90, 180, 120, 40);
 	quitBtn->setFlat(0);
 
 	title1->show();
 	startBtn->show();
+	loadBtn->show();
 	quitBtn->show();
 
 	connect(startBtn, SIGNAL(clicked(bool)), this, SLOT(startGame_slot()));
 	connect(quitBtn, SIGNAL(clicked(bool)), qApp, SLOT(quit()));
+	connect(loadBtn, SIGNAL(clicked(bool)), this, SLOT(loadFile_slot()));
 }
 
 //設定初始棋盤
@@ -73,68 +82,142 @@ void Viewer::paintEvent(QPaintEvent*) {
 	if (start) {
 		QPainter painter(this);
 
-		painter.drawPixmap(QRect(0, 0, 550, 598), QPixmap(":/ChineseChess/img/Board-4.jpg")); //畫出棋盤
+		//劃出棋盤
+		painter.drawPixmap(QRect(0, 0, 550, 598), QPixmap(":/ChineseChess/img/Board-4.jpg"));
 
+		//劃出選擇框
 		if (xPos < 9 && yPos < 10) {
-			painter.drawPixmap(QRect(25 + 56 * xPos, 25 + 56 * yPos, 50, 50), QPixmap(":/ChineseChess/img/select.png")); //畫出選擇框
+			painter.drawPixmap(QRect(25 + 56 * xPos, 25 + 56 * yPos, 50, 50), QPixmap(":/ChineseChess/img/select.png"));
 		}
 
+		//劃出可移動位置
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 10; j++) {
+				if (Board::move[i][j] == 1) {
+					painter.drawPixmap(QRect(25 + 56 * i, 25 + 56 * j, 50, 50), QPixmap(":/ChineseChess/img/canMove.png"));
+				}
+			}
+		}
+
+		//畫出所有棋子
 		for (int i = 0; i < Board::onBoard.size(); i++) {
-			int tx =  Board::onBoard[i]->getX();
-			int ty = Board::onBoard[i]->getY();
-			QString pic = QString::fromStdString(Board::onBoard[i]->getPic());
-			painter.drawPixmap(QRect(25 + 56 * tx, 25 + 56 * ty, 50, 50), QPixmap(pic));
+            if(Board::onBoard[i]->alive)
+            {
+                int tx =  Board::onBoard[i]->getX();
+                int ty = Board::onBoard[i]->getY();
+                QString pic = QString::fromStdString(Board::onBoard[i]->getPic());
+                painter.drawPixmap(QRect(25 + 56 * tx, 25 + 56 * ty, 50, 50), QPixmap(pic));
+            }
+
 		}
 		update();
 	}
 }
 
 void Viewer::mousePressEvent(QMouseEvent* pos) {
-	// QToolTip::showText();
-	 //QMessageBox::about(this,"Information",);
- //    label = new QLabel("pos",this);
- //    pos->globalPosition();
- //    label->setText();
- //    label->setGeometry(1,1,100,100);
-	// update();
+	if (start) {
 
-	//取得滑鼠位置
-	pos->globalPos();
-	xPos = (pos->x() - 25) / 56;
-	yPos = (pos->y() - 25) / 56;
-	label->setText(QString("%1, %2").arg(xPos).arg(yPos));
+		//取得滑鼠位置
+		pos->globalPos();
 
-	//=============================================================================
-
-	static int press = 0;
-	static int index;
-	static int nx, ny; //第二次選取的點
-	static int tmpX, tmpY; //紀錄第一次點到的棋子
-	if (press == 1) {
-		nx = xPos;
-		ny = yPos;
-		press++;
-		
-	}
-	else if (press == 0) {
-		for (int i = 0; i < Board::onBoard.size(); i++) {
-
-			//取出棋子位置
-			tmpX = Board::onBoard[i]->getX();
-			tmpY = Board::onBoard[i]->getY();
-
-			if (xPos == tmpX && yPos == tmpY) {	//第一次抓取位置
-				index = i;
-				press++;
-				break;
+		if (pos->x() >= 25 && pos->y() >= 25) {
+			if ((((pos->x() - 25) / 56) <= 8) && (((pos->y() - 25) / 56) <= 9)) {
+				xPos = (pos->x() - 25) / 56;
+				yPos = (pos->y() - 25) / 56;
 			}
+		}
+		
+
+		label->setText(QString("%1, %2").arg(xPos).arg(yPos));
+		//label->setText(QString("Current Player: %1").arg(GameManager::currentPlayer));
+
+		//=============================================================================
+
+		static int press = 0;
+		static int index = -1;
+		static int nx, ny; //第二次選取的點
+		static int tmpX, tmpY; //紀錄第一次點到的棋子
+        //Board::clearMove();
+		if (press == 1) {
+			nx = xPos;
+			ny = yPos;
+			press++;
+
 
 		}
+		else if (press == 0) {
+
+			for (int i = 0; i < Board::onBoard.size(); i++) {
+
+				//取出棋子位置
+				tmpX = Board::onBoard[i]->getX();
+				tmpY = Board::onBoard[i]->getY();
+
+
+                if (xPos == tmpX && yPos == tmpY &&Board::onBoard[i]->alive) {	//第一次抓取位置
+					Board::onBoard[i]->canMove();
+					index = i;
+					press++;
+					break;
+				}
+
+			}
+		}
+
+		if (press == 2) {
+            press = 0;
+            //Board::clearMove();
+            if (Board::board[nx][ny] == 0) { //移動位置為空 --> 移動棋子
+                Board::onBoard[index]->move(nx, ny);
+                Board::clearMove();
+                //消除選取框
+                xPos = 10;
+				yPos = 10;
+			}
+            else if(Board::board[nx][ny] == Board::onBoard[index]->color*-1) //吃棋
+            {
+				if (Board::move[xPos][yPos] == 1) {
+					for (int i = 0; i < Board::onBoard.size(); i++)
+					{
+						tmpX = Board::onBoard[i]->getX();
+						tmpY = Board::onBoard[i]->getY();
+
+
+						if (nx == tmpX && ny == tmpY && Board::onBoard[i]->alive) {	//第一次抓取位置
+							Board::onBoard[i]->alive = false;
+
+						}
+					}
+					Board::onBoard[index]->move(nx, ny);
+					
+				}
+				Board::clearMove();
+				//消除選取框
+				xPos = 10;
+				yPos = 10;
+            }
+			else { //移動位置有棋 --> 視為重新選定
+				Board::clearMove();
+				for (int i = 0; i < Board::onBoard.size(); i++) {
+
+					//取出棋子位置
+					tmpX = Board::onBoard[i]->getX();
+					tmpY = Board::onBoard[i]->getY();
+
+
+                    if (xPos == tmpX && yPos == tmpY&&Board::onBoard[i]->alive) {	//第一次抓取位置
+						Board::onBoard[i]->canMove();
+						index = i;
+						press++;
+						break;
+					}
+
+				}
+			}
+		}
+
 	}
-	if(press == 2){
-		Board::onBoard[index]->move(nx, ny);
-		press = 0;
-	}
+	
 	//=============================================================================
 }
 
@@ -153,6 +236,7 @@ void Viewer::startGame_slot() {
 	start = true;
 	title1->hide();
 	startBtn->hide();
+	loadBtn->hide();
 	quitBtn->hide();
 	label->show();
 }
@@ -168,4 +252,22 @@ void Viewer::restartGame_slot() {
 	/*for (int i = 0; i < Board::onBoard.size(); i++) {
 		Board::onBoard[i]->resetChess();
 	}*/
+}
+
+void Viewer::loadFile_slot()
+{
+	//QMessageBox::information(this, "Info", "Load File Success!");
+	QString filePath = QFileDialog::getOpenFileName(NULL, QObject::tr("Open File"),
+		qApp->applicationDirPath(), QObject::tr("Text (*.txt)"));
+
+	GameManager::loadFile(filePath.toStdString());
+	cout << filePath.toStdString() << endl;
+	
+	if (filePath != "") {
+		QMessageBox msg;
+		msg.setText("Load File Success!");
+		startGame_slot();
+		msg.exec();
+	}
+	
 }

@@ -12,11 +12,12 @@ public:
     GameManager();
     void showMenu();
     static void restartGame();
+    static void loadFile(string path);
    // void pushIn(Chess* ch);
+    static int currentPlayer;
 
 private:
     Board b;
-    int currentPlayer;
     Viewer v;
 };
 

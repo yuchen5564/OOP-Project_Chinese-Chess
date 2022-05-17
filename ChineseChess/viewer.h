@@ -11,7 +11,7 @@
 #include <QPainter>
 #include <QToolTip>
 #include <QString>
-#include <qobject.h>
+#include <QFileDialog>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Viewer; }
@@ -34,13 +34,15 @@ public:
 public slots:
 	void startGame_slot();
 	void restartGame_slot();
+	void loadFile_slot();
 
 private:
 	Ui::Viewer* ui;
 
-	QPushButton* startBtn;
-	QPushButton* quitBtn;
-	QPushButton* restartBtn;
+	QPushButton* startBtn; //開始遊戲
+	QPushButton* quitBtn; //結束遊戲
+	QPushButton* restartBtn; //重新開始
+	QPushButton* loadBtn;
 
 	QLabel* title1; //封面標題
 	QLabel* label; //顯示點選位置

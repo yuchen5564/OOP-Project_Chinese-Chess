@@ -73,9 +73,6 @@
     <ClInclude Include="Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ma.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="viewer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -144,5 +141,13 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="img\icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="test.txt" />
   </ItemGroup>
 </Project>

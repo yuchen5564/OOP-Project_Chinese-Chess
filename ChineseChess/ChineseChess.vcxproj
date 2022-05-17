@@ -171,7 +171,7 @@
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
       <OutputFile>$(OutDir)\ChineseChess.exe</OutputFile>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Link>
     <Midl>
@@ -215,7 +215,6 @@
     <ClInclude Include="Chess.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Header.h" />
-    <ClInclude Include="Ma.h" />
     <QtMoc Include="viewer.h">
     </QtMoc>
   </ItemGroup>
@@ -244,6 +243,12 @@
     <QtRcc Include="img.qrc">
     </QtRcc>
     <None Include="img\select.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="img\icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="test.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
