@@ -7,6 +7,9 @@ int GameManager::currentPlayer = 0;
 GameManager::GameManager()
 {
     Board::onBoard = onBoard;
+    fstream file;
+    file.open("log.txt", ios::out|ios::trunc);
+    file.close();
    // currentPlayer = 0;
 }
 
@@ -22,13 +25,16 @@ void GameManager::restartGame()
         Board::onBoard[i]->resetChess();
     }
     GameManager::currentPlayer = 0;
+    fstream file;
+    file.open("log.txt", ios::out | ios::trunc);
+    file.close();
     Board::printBoard();
 }
 
 void GameManager::loadFile(string path)
 {
     fstream file;
-    file.open(path);
+    file.open(path, ios::in);
     string input;
     int nowX, nowY, nextX, nextY;
     while (getline(file, input)) {
@@ -41,19 +47,33 @@ void GameManager::loadFile(string path)
         for (int i = 0; i < Board::onBoard.size(); i++) {
             if (Board::onBoard[i]->getX() == nowX && Board::onBoard[i]->getY() == nowY) {
                 Board::onBoard[i]->canMove();
+                cout << "find!\n";
                 if (Board::board[nextX][nextY] != 0) {
+                    
                     for (int j = 0; j < Board::onBoard.size(); j++) {
                         if (Board::onBoard[j]->getX() == nextX && Board::onBoard[j]->getY() == nextY) {
                             Board::onBoard[j]->alive = false;
+                            
                         }
                     }
                 }
                 Board::onBoard[i]->move(nextX, nextY);
+                Board::onBoard[i]->makeLog(nowX, nowY);
                 Board::clearMove();
             }
         }
     }
+    
     Board::clearMove();
+    file.close();
+}
+
+void GameManager::writeLog(string log)
+{
+    fstream file;
+    file.open("log.txt", ios::out | ios::app);
+    file << log;
+    cout << log << endl;
     file.close();
 }
 

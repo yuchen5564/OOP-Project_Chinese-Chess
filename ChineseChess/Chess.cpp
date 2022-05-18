@@ -53,6 +53,21 @@ void Chess::resetChess()
     alive = true;
 }
 
+void Chess::makeLog(int beforeX, int beforeY)
+{
+    //Player: 1, Action: Soldier (6, 6) -> (6, 5)
+    string log;
+    if (color == 1) {
+        log = "Player: 1, Action: ";
+    }
+    else {
+        log = "Player: 2, Action: ";
+    }
+    log = log + name + " (" + to_string(beforeX) +
+        ", " + to_string(beforeY) + ") -> (" + to_string(_x) + ", " + to_string(_y) + ")\n";
+    GameManager::writeLog(log);
+}
+
 void Chess::canMove()
 {
     Board::clearMove();
@@ -76,6 +91,7 @@ King::King(int x, int y, int col, string src)
     firstY = y;
     pic = src;
     color = col;
+    name = "King";
 }
 void King::move(int x, int y)
 {
@@ -175,6 +191,7 @@ void King::canMove()
 
 
 }
+
 void Advisor::move(int x, int y)
 {
     if(Board::move[x][y]==1)
@@ -199,6 +216,7 @@ Advisor::Advisor(int x, int y, int col, string src)
     firstY = y;
     pic = src;
     color = col;
+    name = "Advisor";
 }
 void Advisor::canMove()
 {
@@ -307,6 +325,7 @@ Minister::Minister(int x, int y, int col, string src)
     firstY = y;
     pic = src;
     color = col;
+    name = "Minister";
 }
 
 void Minister::canMove()
@@ -399,6 +418,7 @@ Horse::Horse(int x, int y, int col, string src)
     firstY = y;
     pic = src;
     color = col;
+    name = "Horse";
 }
 void Horse::move(int x, int y)
 {
@@ -579,6 +599,7 @@ Soldier::Soldier(int x, int y, int col, string src)
     firstY = y;
     pic = src;
     color = col;
+    name = "Soldier";
 }
 void Soldier::move(int x, int y)
 {
@@ -698,6 +719,7 @@ Chariot::Chariot(int x, int y, int col, string src)
     firstY = y;
     pic = src;
     color = col;
+    name = "Chariot";
 }
 void Chariot::move(int x, int y)
 {
@@ -838,6 +860,7 @@ Cannon::Cannon(int x, int y, int col, string src)
     firstY = y;
     pic = src;
     color = col;
+    name = "Cannon";
 }
 
 void Cannon::move(int x, int y)

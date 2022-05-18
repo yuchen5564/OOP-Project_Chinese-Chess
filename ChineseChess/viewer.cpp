@@ -87,10 +87,16 @@ void Viewer::setBoard() {
 	surrenderBtn->setFlat(0);
 	surrenderBtn->show();
 
+	saveGameBtn = new QPushButton("存檔", this);
+	saveGameBtn->setGeometry(565, 240, 120, 40);
+	saveGameBtn->setFlat(0);
+	surrenderBtn->show();
+
 	update();
 
 	connect(restartBtn, SIGNAL(clicked(bool)), this, SLOT(restartGame_slot()));
 	connect(surrenderBtn, SIGNAL(clicked(bool)), this, SLOT(surrender_slot()));
+	connect(saveGameBtn, SIGNAL(clicked(bool)), this, SLOT(saveGame_slot()));
 }
 
 //***會主動更新
@@ -195,6 +201,7 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
             //Board::clearMove();
             if (Board::board[nx][ny] == 0) { //移動位置為空 --> 移動棋子
                 Board::onBoard[index]->move(nx, ny);
+				Board::onBoard[index]->makeLog(tmpX, tmpY);
                 Board::clearMove();
                 //消除選取框
                 xPos = 10;
@@ -205,16 +212,17 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				if (Board::move[xPos][yPos] == 1) {
 					for (int i = 0; i < Board::onBoard.size(); i++)
 					{
-						tmpX = Board::onBoard[i]->getX();
-						tmpY = Board::onBoard[i]->getY();
+						int tx = Board::onBoard[i]->getX();
+						int ty = Board::onBoard[i]->getY();
 
 
-						if (nx == tmpX && ny == tmpY && Board::onBoard[i]->alive) {	//第一次抓取位置
+						if (nx == tx && ny == ty && Board::onBoard[i]->alive) {
 							Board::onBoard[i]->alive = false;
 
 						}
 					}
 					Board::onBoard[index]->move(nx, ny);
+					Board::onBoard[index]->makeLog(tmpX, tmpY);
 					
 				}
 				Board::clearMove();
@@ -231,7 +239,7 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 					tmpY = Board::onBoard[i]->getY();
 
 
-                    if (xPos == tmpX && yPos == tmpY&&Board::onBoard[i]->alive) {	//第一次抓取位置
+                    if (xPos == tmpX && yPos == tmpY && Board::onBoard[i]->alive) {	//第一次抓取位置
 						Board::onBoard[i]->canMove();
 						index = i;
 						press++;
@@ -241,28 +249,31 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				}
 			}
 		}
+		if (!GameManager::checkKing()) {
+			QMessageBox msg;
+			if (GameManager::currentPlayer % 2 == 0) {
+				msg.setText("黑方獲勝!");
+			}
+			else {
+				msg.setText("紅方獲勝!");
+			}
+			msg.exec();
+			if (!(QMessageBox::information(this, tr("Warning"), tr("是否要儲存檔案?"), tr("Yes"), tr("No"))))
+			{
+				saveGame_slot();
+			}
+			reset();
+		}
 
-	}
-
-	if (!GameManager::checkKing()) {
-		QMessageBox msg;
 		if (GameManager::currentPlayer % 2 == 0) {
-			msg.setText("黑方獲勝!");
+			nowPlayer_label->setText(QString("現在輪到\n　紅方"));
 		}
 		else {
-			msg.setText("紅方獲勝!");
+			nowPlayer_label->setText(QString("現在輪到\n　黑方"));
 		}
-		
-		msg.exec();
-		reset();
 	}
 
-	if (GameManager::currentPlayer % 2 == 0) {
-		nowPlayer_label->setText(QString("現在輪到\n　紅方"));
-	}
-	else {
-		nowPlayer_label->setText(QString("現在輪到\n　黑方"));
-	}
+	
 	//=============================================================================
 }
 
@@ -288,6 +299,7 @@ void Viewer::startGame_slot() {
 	click_label->show();
 	nowPlayer_label->show();
 	surrenderBtn->show();
+	saveGameBtn->show();
 }
 
 void Viewer::reset()
@@ -298,6 +310,7 @@ void Viewer::reset()
 	click_label->hide();
 	nowPlayer_label->hide();
 	surrenderBtn->hide();
+	saveGameBtn->hide();
 	//0513 ADD
 	GameManager::restartGame();
 }
@@ -305,12 +318,12 @@ void Viewer::reset()
 void Viewer::restartGame_slot() {
 	if (!(QMessageBox::information(this, tr("Warning"), tr("是否確認重新開始遊戲?"), tr("Yes"), tr("No"))))
 	{
+		if (!(QMessageBox::information(this, tr("Warning"), tr("是否要儲存檔案?"), tr("Yes"), tr("No"))))
+		{
+			saveGame_slot();
+		}
 		reset();
 	}
-	
-	/*for (int i = 0; i < Board::onBoard.size(); i++) {
-		Board::onBoard[i]->resetChess();
-	}*/
 }
 
 void Viewer::loadFile_slot()
@@ -328,7 +341,19 @@ void Viewer::loadFile_slot()
 		startGame_slot();
 		msg.exec();
 	}
-	
+
+	if (!GameManager::checkKing()) {
+		QMessageBox msg;
+		if (GameManager::currentPlayer % 2 == 0) {
+			msg.setText("黑方獲勝!");
+		}
+		else {
+			msg.setText("紅方獲勝!");
+		}
+		msg.exec();
+		reset();
+	}
+
 }
 
 void Viewer::surrender_slot()
@@ -343,6 +368,24 @@ void Viewer::surrender_slot()
 			msg.setText("紅方獲勝!");
 		}
 		msg.exec();
+		if (!(QMessageBox::information(this, tr("Warning"), tr("是否要儲存檔案?"), tr("Yes"), tr("No"))))
+		{
+			saveGame_slot();
+		}
 		reset();
 	}
+	
+}
+
+void Viewer::saveGame_slot()
+{
+	QDateTime time = QDateTime::currentDateTime();
+	QString str = time.toString("yyyy-MM-dd_hh-mm-ss");
+	string path = "save\\" + str.toStdString() + ".txt";
+	string command = "copy log.txt " + path;
+	cout << command << endl;
+	system(command.c_str());
+	QMessageBox msg;
+	msg.setText("存檔成功！\n檔案已存放至：\n目前目錄\\save\\"+str+".txt");
+	msg.exec();
 }

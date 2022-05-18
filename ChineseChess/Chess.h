@@ -15,6 +15,7 @@ public:
     int getY();
     int getIndex();
     void resetChess(); //0513 ADD 回復初始位置
+    void makeLog(int beforeX, int beforeY); //建立Log紀錄
     int  color; //紀錄棋子顏色
     bool alive = true; //紀錄是否存活
     string getPic();

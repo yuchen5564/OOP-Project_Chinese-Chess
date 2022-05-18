@@ -37,6 +37,7 @@ public slots:
 	void restartGame_slot();
 	void loadFile_slot();
 	void surrender_slot();
+	void saveGame_slot();
 
 private:
 	Ui::Viewer* ui;
@@ -46,6 +47,7 @@ private:
 	QPushButton* restartBtn; //重新開始
 	QPushButton* loadBtn; //載入黨案
 	QPushButton* surrenderBtn; //投降
+	QPushButton* saveGameBtn; //存檔
 
 	QLabel* title1; //封面標題
 	QLabel* click_label; //顯示點選位置
