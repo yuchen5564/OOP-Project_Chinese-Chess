@@ -13,10 +13,12 @@ public:
     void showMenu();
     static void restartGame();
     static void loadFile(string path);
-   // void pushIn(Chess* ch);
+    void pushIn(Chess* ch);
     static int currentPlayer;
-
+    
+    static bool checkKing();
 private:
+    vector<Chess*> onBoard;
     Board b;
     Viewer v;
 };

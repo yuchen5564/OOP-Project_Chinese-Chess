@@ -19,7 +19,7 @@ public:
     bool alive = true; //紀錄是否存活
     string getPic();
 protected:
-//    string name;
+    string name;
     int index;
     string pic; //圖片路徑
     int _x, _y; //棋子目前位置

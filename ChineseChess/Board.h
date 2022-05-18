@@ -9,7 +9,10 @@ public:
 	static int move[9][10];
 	static void pushIn(Chess*);
 	static void printBoard();
+	static void resetBoard();
 	static void clearMove();
 	static void printMove();
+	static Chess* RKing;
+	static Chess* BKing;
 };
 

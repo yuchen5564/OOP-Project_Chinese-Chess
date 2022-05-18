@@ -6,6 +6,7 @@ int GameManager::currentPlayer = 0;
 
 GameManager::GameManager()
 {
+    Board::onBoard = onBoard;
    // currentPlayer = 0;
 }
 
@@ -16,10 +17,12 @@ void GameManager::showMenu(){
 
 void GameManager::restartGame()
 {
+    Board::resetBoard();
     for (int i = 0; i < Board::onBoard.size(); i++)  {
         Board::onBoard[i]->resetChess();
     }
     GameManager::currentPlayer = 0;
+    Board::printBoard();
 }
 
 void GameManager::loadFile(string path)
@@ -52,6 +55,25 @@ void GameManager::loadFile(string path)
     }
     Board::clearMove();
     file.close();
+}
+
+void GameManager::pushIn(Chess* ch)
+{
+    onBoard.push_back(ch);
+    Board::board[ch->getX()][ch->getY()] = ch->color;
+    //Board::pushIn(ch);
+    Board::onBoard = onBoard;
+}
+
+
+bool GameManager::checkKing()
+{
+    if (Board::RKing->alive && Board::BKing->alive) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 //void GameManager::pushIn(Chess* ch)

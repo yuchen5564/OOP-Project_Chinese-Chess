@@ -62,19 +62,35 @@ void Viewer::setBoard() {
 
 	setFixedSize(700, 598);
 
-	label = new QLabel(" ", this);
-	label->setFont(QFont("微軟正黑體", 15));
-	label->setGeometry(1, 1, 150, 30);
+	click_label = new QLabel(" ", this);
+	click_label->setFont(QFont("微軟正黑體", 15));
+	click_label->setGeometry(1, 1, 150, 30);
 	//label->show();
 
+	nowPlayer_label = new QLabel(" ", this);
+	if (GameManager::currentPlayer % 2 == 0) {
+		nowPlayer_label->setText(QString("現在輪到\n　紅方"));
+	}
+	else {
+		nowPlayer_label->setText(QString("現在輪到\n　黑方"));
+	}
+	nowPlayer_label->setFont(QFont("微軟正黑體", 15));
+	nowPlayer_label->setGeometry(585, 40, 120, 60);
+
 	restartBtn = new QPushButton("重新開始", this);
-	restartBtn->setGeometry(565, 40, 120, 40);
+	restartBtn->setGeometry(565, 120, 120, 40);
 	restartBtn->setFlat(0);
 	restartBtn->show();
+
+	surrenderBtn = new QPushButton("投降", this);
+	surrenderBtn->setGeometry(565, 180, 120, 40);
+	surrenderBtn->setFlat(0);
+	surrenderBtn->show();
 
 	update();
 
 	connect(restartBtn, SIGNAL(clicked(bool)), this, SLOT(restartGame_slot()));
+	connect(surrenderBtn, SIGNAL(clicked(bool)), this, SLOT(surrender_slot()));
 }
 
 //***會主動更新
@@ -128,7 +144,10 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 		}
 		
 
-		label->setText(QString("%1, %2").arg(xPos).arg(yPos));
+		click_label->setText(QString("%1, %2").arg(xPos).arg(yPos));
+
+		
+
 		//label->setText(QString("Current Player: %1").arg(GameManager::currentPlayer));
 
 		//=============================================================================
@@ -138,12 +157,15 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 		static int nx, ny; //第二次選取的點
 		static int tmpX, tmpY; //紀錄第一次點到的棋子
         //Board::clearMove();
+		int nowPlayer = GameManager::currentPlayer % 2;
+
+		if (nowPlayer == 0) nowPlayer = 1;
+		else if (nowPlayer == 1) nowPlayer = -1;
+
 		if (press == 1) {
 			nx = xPos;
 			ny = yPos;
 			press++;
-
-
 		}
 		else if (press == 0) {
 
@@ -154,16 +176,20 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				tmpY = Board::onBoard[i]->getY();
 
 
-                if (xPos == tmpX && yPos == tmpY &&Board::onBoard[i]->alive) {	//第一次抓取位置
+                if (xPos == tmpX && yPos == tmpY && Board::onBoard[i]->alive
+					&& nowPlayer == Board::onBoard[i]->color) {	//第一次抓取位置
 					Board::onBoard[i]->canMove();
 					index = i;
 					press++;
 					break;
 				}
+				/*if (nowPlayer != Board::onBoard[i]->color) {
+					xPos = 10;
+					yPos = 10;
+				}*/
 
 			}
 		}
-
 		if (press == 2) {
             press = 0;
             //Board::clearMove();
@@ -217,7 +243,26 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 		}
 
 	}
-	
+
+	if (!GameManager::checkKing()) {
+		QMessageBox msg;
+		if (GameManager::currentPlayer % 2 == 0) {
+			msg.setText("黑方獲勝!");
+		}
+		else {
+			msg.setText("紅方獲勝!");
+		}
+		
+		msg.exec();
+		reset();
+	}
+
+	if (GameManager::currentPlayer % 2 == 0) {
+		nowPlayer_label->setText(QString("現在輪到\n　紅方"));
+	}
+	else {
+		nowPlayer_label->setText(QString("現在輪到\n　黑方"));
+	}
 	//=============================================================================
 }
 
@@ -227,6 +272,8 @@ void Viewer::mouseMoveEvent(QMouseEvent* pos) {
 	QToolTip::showText(pos->globalPos(), QString("%1, %2").arg(pos->x()).arg(pos->y()));;
 
 }
+
+
 
 //信號槽
 void Viewer::startGame_slot() {
@@ -238,17 +285,29 @@ void Viewer::startGame_slot() {
 	startBtn->hide();
 	loadBtn->hide();
 	quitBtn->hide();
-	label->show();
+	click_label->show();
+	nowPlayer_label->show();
+	surrenderBtn->show();
 }
 
-void Viewer::restartGame_slot() {
+void Viewer::reset()
+{
 	menu();
 	start = false;
 	restartBtn->hide();
-	label->hide();
-
+	click_label->hide();
+	nowPlayer_label->hide();
+	surrenderBtn->hide();
 	//0513 ADD
 	GameManager::restartGame();
+}
+
+void Viewer::restartGame_slot() {
+	if (!(QMessageBox::information(this, tr("Warning"), tr("是否確認重新開始遊戲?"), tr("Yes"), tr("No"))))
+	{
+		reset();
+	}
+	
 	/*for (int i = 0; i < Board::onBoard.size(); i++) {
 		Board::onBoard[i]->resetChess();
 	}*/
@@ -270,4 +329,20 @@ void Viewer::loadFile_slot()
 		msg.exec();
 	}
 	
+}
+
+void Viewer::surrender_slot()
+{
+	if (!(QMessageBox::information(this, tr("Warning"), tr("是否確認投降?"), tr("Yes"), tr("No"))))
+	{
+		QMessageBox msg;
+		if (GameManager::currentPlayer % 2 == 0) {
+			msg.setText("黑方獲勝!");
+		}
+		else {
+			msg.setText("紅方獲勝!");
+		}
+		msg.exec();
+		reset();
+	}
 }

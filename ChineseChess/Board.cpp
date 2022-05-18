@@ -3,6 +3,8 @@
 vector<Chess*> Board::onBoard;
 int Board::board[9][10] = { };
 int Board::move[9][10] = { };
+Chess* Board::RKing = nullptr;
+Chess* Board::BKing = nullptr;
 
 void Board::pushIn(Chess* ch)
 {
@@ -21,6 +23,15 @@ void Board::printBoard()
 		cout << endl;
 	}
 	cout << "------------------------------\n";
+}
+
+void Board::resetBoard()
+{
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 10; j++) {
+			Board::board[i][j] = 0;
+		}
+	}
 }
 
 

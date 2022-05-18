@@ -30,11 +30,13 @@ public:
 	void paintEvent(QPaintEvent*);
 	void mousePressEvent(QMouseEvent*);
 	void mouseMoveEvent(QMouseEvent*);
+	void reset();
 
 public slots:
 	void startGame_slot();
 	void restartGame_slot();
 	void loadFile_slot();
+	void surrender_slot();
 
 private:
 	Ui::Viewer* ui;
@@ -42,10 +44,12 @@ private:
 	QPushButton* startBtn; //開始遊戲
 	QPushButton* quitBtn; //結束遊戲
 	QPushButton* restartBtn; //重新開始
-	QPushButton* loadBtn;
+	QPushButton* loadBtn; //載入黨案
+	QPushButton* surrenderBtn; //投降
 
 	QLabel* title1; //封面標題
-	QLabel* label; //顯示點選位置
+	QLabel* click_label; //顯示點選位置
+	QLabel* nowPlayer_label;
 
 	bool start = false;
 	int xPos = 10, yPos = 10; //點擊位置

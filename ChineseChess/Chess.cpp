@@ -24,9 +24,9 @@ void Chess::move(int x, int y)
         _x = x;
         _y = y;
         Board::board[x][y] = 2;
-        GameManager::currentPlayer++;
+        
     }*/
-    
+    GameManager::currentPlayer++;
     Board::printBoard();
 }
 
@@ -46,7 +46,7 @@ int Chess::getIndex()
 //0513 ADD ¦^´_ªì©l¦ì¸m
 void Chess::resetChess()
 {
-    Board::board[_x][_y] = 0;
+    //Board::board[_x][_y] = 0;
     _x = firstX;
     _y = firstY;
     Board::board[_x][_y] = color;
@@ -282,6 +282,7 @@ void Advisor::canMove()
     }
      //Board::printBoard();
 }
+
 void Minister::move(int x, int y)
 {
     if(Board::move[x][y]==1)
