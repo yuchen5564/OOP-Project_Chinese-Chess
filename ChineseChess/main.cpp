@@ -7,6 +7,7 @@ int main(int argc, char* argv[])
 {
 	QApplication a(argc, argv);
 	GameManager game;
+
 	//Chess ch01(6, 6,-1, ":/ChineseChess/img/R_bing.png");
 	//Chess ch02(0, 0, 1,":/ChineseChess/img/B_che.png");
 	//Chess ch03(1, 7, 1,":/ChineseChess/img/R_pao.png");
@@ -42,9 +43,9 @@ int main(int argc, char* argv[])
 	Cannon ch33(7, 2, -1, ":/ChineseChess/img/B_pao.png");
 	Cannon ch34(1, 7, 1, ":/ChineseChess/img/R_pao.png");
 	Cannon ch35(7, 7, 1, ":/ChineseChess/img/R_pao.png");
-	//ch01 = Chess(8, 9, ":/ChineseChess/img/R_jiang.png");
-   // game.pushIn(&ch01);
-   // game.pushIn(&ch02);
+
+	//game.pushIn(&ch01);
+    //game.pushIn(&ch02);
 	//game.pushIn(&ch03);
 	Board::BKing = &ch04;
 	Board::RKing = &ch05;

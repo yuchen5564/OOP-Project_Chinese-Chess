@@ -12,6 +12,9 @@ public:
 	static void resetBoard();
 	static void clearMove();
 	static void printMove();
+	static int virtualMove[9][10]; // for 將軍判斷 by ming 05/19
+	static void clearVirtualMove(); // for 將軍判斷 by ming 05/19
+	static void printVirtualMove(); // for 將軍判斷 by ming 05/19
 	static Chess* RKing;
 	static Chess* BKing;
 };

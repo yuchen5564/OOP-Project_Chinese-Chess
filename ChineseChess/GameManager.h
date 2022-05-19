@@ -18,6 +18,7 @@ public:
     static int currentPlayer;
     //static bool 
     static bool checkKing();
+    static bool isCheck(); //提示將軍
 private:
     vector<Chess*> onBoard;
     Board b;

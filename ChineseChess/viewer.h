@@ -12,6 +12,8 @@
 #include <QToolTip>
 #include <QString>
 #include <QFileDialog>
+#include <QTimer>
+#include <QLCDNumber>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Viewer; }
@@ -34,10 +36,12 @@ public:
 
 public slots:
 	void startGame_slot();
-	void restartGame_slot();
+	void restartGame_slot(int f = 1);
 	void loadFile_slot();
 	void surrender_slot();
-	void saveGame_slot();
+	void saveGame_slot(int f = 1);
+	void timeout_slot();
+	//void timeEvent(QTimerEvent *event);
 
 private:
 	Ui::Viewer* ui;
@@ -52,8 +56,15 @@ private:
 	QLabel* title1; //封面標題
 	QLabel* click_label; //顯示點選位置
 	QLabel* nowPlayer_label;
+	QLabel* time_label;	
+	QLabel* checkKing_label;
+
+	QTimer* timer;
 
 	bool start = false;
 	int xPos = 10, yPos = 10; //點擊位置
+
+	int counter = 0;
+	const int setTime = 40;
 };
 #endif // VIEWER_H

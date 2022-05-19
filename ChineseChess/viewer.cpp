@@ -1,6 +1,7 @@
 //定位: 25+56*x ,25+56*y
 //棋子大小: 50*50
 
+
 #include "viewer.h"
 #include "ui_viewer.h"
 #include "GameManager.h"
@@ -14,6 +15,10 @@ Viewer::Viewer(QWidget* parent)
 	ui->setupUi(this);
 	setWindowTitle("Chinese Chess");
 	setWindowIcon(QIcon(":/ChineseChess/img/icon.png"));
+
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(timeout_slot()));
+	timer->stop();
 }
 
 Viewer::~Viewer()
@@ -22,6 +27,10 @@ Viewer::~Viewer()
 }
 
 void Viewer::menu() {
+
+	start = false;
+	timer->stop();
+
 	Board::clearMove();
 	setFixedSize(300, 250);
 
@@ -46,6 +55,8 @@ void Viewer::menu() {
 	loadBtn->show();
 	quitBtn->show();
 
+	GameManager::restartGame();
+
 	connect(startBtn, SIGNAL(clicked(bool)), this, SLOT(startGame_slot()));
 	connect(quitBtn, SIGNAL(clicked(bool)), qApp, SLOT(quit()));
 	connect(loadBtn, SIGNAL(clicked(bool)), this, SLOT(loadFile_slot()));
@@ -62,10 +73,20 @@ void Viewer::setBoard() {
 
 	setFixedSize(700, 598);
 
+	timer->start(1000);
+
 	click_label = new QLabel(" ", this);
 	click_label->setFont(QFont("微軟正黑體", 15));
 	click_label->setGeometry(1, 1, 150, 30);
-	//label->show();
+
+	time_label = new QLabel(" ", this);
+	time_label->setFont(QFont("微軟正黑體", 15));
+	time_label->setGeometry(556, 5, 150, 30);
+
+	checkKing_label = new QLabel(" ", this);
+	checkKing_label->setFont(QFont("微軟正黑體", 25));
+	checkKing_label->setGeometry(550, 300, 150, 120);
+	checkKing_label->show();
 
 	nowPlayer_label = new QLabel(" ", this);
 	if (GameManager::currentPlayer % 2 == 0) {
@@ -102,6 +123,7 @@ void Viewer::setBoard() {
 //***會主動更新
 void Viewer::paintEvent(QPaintEvent*) {
 	if (start) {
+		
 		QPainter painter(this);
 
 		//劃出棋盤
@@ -138,7 +160,7 @@ void Viewer::paintEvent(QPaintEvent*) {
 
 void Viewer::mousePressEvent(QMouseEvent* pos) {
 	if (start) {
-
+		//timeRecord->addSecs(1000);
 		//取得滑鼠位置
 		pos->globalPos();
 
@@ -149,12 +171,11 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 			}
 		}
 		
-
-		click_label->setText(QString("%1, %2").arg(xPos).arg(yPos));
-
 		
-
-		//label->setText(QString("Current Player: %1").arg(GameManager::currentPlayer));
+		
+		/*timeRecord->setHMS(0, 10, 0);*/
+		//time_label->setText(QString("%1").arg(timeRecord->toString("hh:mm:ss")));
+		click_label->setText(QString("%1, %2").arg(xPos).arg(yPos));
 
 		//=============================================================================
 
@@ -162,7 +183,6 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 		static int index = -1;
 		static int nx, ny; //第二次選取的點
 		static int tmpX, tmpY; //紀錄第一次點到的棋子
-        //Board::clearMove();
 		int nowPlayer = GameManager::currentPlayer % 2;
 
 		if (nowPlayer == 0) nowPlayer = 1;
@@ -184,15 +204,11 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 
                 if (xPos == tmpX && yPos == tmpY && Board::onBoard[i]->alive
 					&& nowPlayer == Board::onBoard[i]->color) {	//第一次抓取位置
-					Board::onBoard[i]->canMove();
+					Board::onBoard[i]->canMove(0);
 					index = i;
 					press++;
 					break;
 				}
-				/*if (nowPlayer != Board::onBoard[i]->color) {
-					xPos = 10;
-					yPos = 10;
-				}*/
 
 			}
 		}
@@ -200,7 +216,13 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
             press = 0;
             //Board::clearMove();
             if (Board::board[nx][ny] == 0) { //移動位置為空 --> 移動棋子
+				
                 Board::onBoard[index]->move(nx, ny);
+				counter = -1;
+				timer->stop();
+				timer->start(1000);
+				
+
 				Board::onBoard[index]->makeLog(tmpX, tmpY);
                 Board::clearMove();
                 //消除選取框
@@ -222,6 +244,10 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 						}
 					}
 					Board::onBoard[index]->move(nx, ny);
+					counter = -1;
+					timer->stop();
+					timer->start(1000);
+
 					Board::onBoard[index]->makeLog(tmpX, tmpY);
 					
 				}
@@ -240,7 +266,7 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 
 
                     if (xPos == tmpX && yPos == tmpY && Board::onBoard[i]->alive) {	//第一次抓取位置
-						Board::onBoard[i]->canMove();
+						Board::onBoard[i]->canMove(0);
 						index = i;
 						press++;
 						break;
@@ -258,12 +284,23 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				msg.setText("紅方獲勝!");
 			}
 			msg.exec();
-			if (!(QMessageBox::information(this, tr("Warning"), tr("是否要儲存檔案?"), tr("Yes"), tr("No"))))
-			{
-				saveGame_slot();
-			}
+			saveGame_slot();
 			reset();
 		}
+
+		Board::clearVirtualMove();
+		if (GameManager::isCheck())
+		{
+
+			checkKing_label->setText("<font color=red>注意!將軍!</font>");
+
+		}
+		else
+		{
+			checkKing_label->setText(" ");
+
+		}
+		Board::printVirtualMove();
 
 		if (GameManager::currentPlayer % 2 == 0) {
 			nowPlayer_label->setText(QString("現在輪到\n　紅方"));
@@ -296,39 +333,71 @@ void Viewer::startGame_slot() {
 	startBtn->hide();
 	loadBtn->hide();
 	quitBtn->hide();
+
+	time_label->show();
+	time_label->setText(QString("剩餘時間: %1 秒").arg(setTime));
+	counter =-1;
+
 	click_label->show();
 	nowPlayer_label->show();
 	surrenderBtn->show();
 	saveGameBtn->show();
+	timer->start(1000);
+	checkKing_label->show();
 }
 
 void Viewer::reset()
 {
-	menu();
+	/*menu();
 	start = false;
 	restartBtn->hide();
 	click_label->hide();
 	nowPlayer_label->hide();
 	surrenderBtn->hide();
-	saveGameBtn->hide();
+	saveGameBtn->hide();*/
 	//0513 ADD
-	GameManager::restartGame();
+	if (!(QMessageBox::information(this, tr("Info"), tr("是否再來一局?"), tr("再來一局"), tr("回到主畫面")))) {
+		counter = 0;
+		GameManager::restartGame();
+		if (GameManager::currentPlayer % 2 == 0) {
+			nowPlayer_label->setText(QString("現在輪到\n　紅方"));
+		}
+		else {
+			nowPlayer_label->setText(QString("現在輪到\n　黑方"));
+		}
+		
+	}
+	else {
+		menu();
+		click_label->hide();
+		time_label->hide();
+		checkKing_label->hide();
+	}
 }
 
-void Viewer::restartGame_slot() {
+void Viewer::restartGame_slot(int f) {
+	timer->stop();
 	if (!(QMessageBox::information(this, tr("Warning"), tr("是否確認重新開始遊戲?"), tr("Yes"), tr("No"))))
 	{
-		if (!(QMessageBox::information(this, tr("Warning"), tr("是否要儲存檔案?"), tr("Yes"), tr("No"))))
-		{
-			saveGame_slot();
+		counter = 0;
+		saveGame_slot();
+		GameManager::restartGame();
+		if (GameManager::currentPlayer % 2 == 0) {
+			nowPlayer_label->setText(QString("現在輪到\n　紅方"));
 		}
-		reset();
+		else {
+			nowPlayer_label->setText(QString("現在輪到\n　黑方"));
+		}
+	}
+	else {
+		if(f == 1)timer->start(1000);
 	}
 }
 
 void Viewer::loadFile_slot()
 {
-	//QMessageBox::information(this, "Info", "Load File Success!");
+	nowPlayer_label->setText(" ");
+	GameManager::restartGame();
 	QString filePath = QFileDialog::getOpenFileName(NULL, QObject::tr("Open File"),
 		qApp->applicationDirPath(), QObject::tr("Text (*.txt)"));
 
@@ -353,11 +422,12 @@ void Viewer::loadFile_slot()
 		msg.exec();
 		reset();
 	}
-
+	
 }
 
 void Viewer::surrender_slot()
 {
+	timer->stop();
 	if (!(QMessageBox::information(this, tr("Warning"), tr("是否確認投降?"), tr("Yes"), tr("No"))))
 	{
 		QMessageBox msg;
@@ -368,24 +438,58 @@ void Viewer::surrender_slot()
 			msg.setText("紅方獲勝!");
 		}
 		msg.exec();
-		if (!(QMessageBox::information(this, tr("Warning"), tr("是否要儲存檔案?"), tr("Yes"), tr("No"))))
-		{
-			saveGame_slot();
-		}
+		saveGame_slot(0);
 		reset();
+	}
+	else {
+		timer->start(1000);
 	}
 	
 }
 
-void Viewer::saveGame_slot()
+void Viewer::saveGame_slot(int f)
 {
-	QDateTime time = QDateTime::currentDateTime();
-	QString str = time.toString("yyyy-MM-dd_hh-mm-ss");
-	string path = "save\\" + str.toStdString() + ".txt";
-	string command = "copy log.txt " + path;
-	cout << command << endl;
-	system(command.c_str());
-	QMessageBox msg;
-	msg.setText("存檔成功！\n檔案已存放至：\n目前目錄\\save\\"+str+".txt");
-	msg.exec();
+	timer->stop();
+	if (!(QMessageBox::information(this, tr("Warning"), tr("是否要儲存檔案?"), tr("Yes"), tr("No"))))
+	{
+		QDateTime time = QDateTime::currentDateTime();
+		QString str = time.toString("yyyy-MM-dd_hh-mm-ss");
+		string path = "save\\" + str.toStdString() + ".txt";
+		string command = "copy log.txt " + path;
+		cout << command << endl;
+		system(command.c_str());
+		QMessageBox msg;
+		msg.setText("存檔成功！\n檔案已存放至：\n目前目錄\\save\\" + str + ".txt");
+		msg.exec();
+	}
+	else {
+		if(f == 1) timer->start(1000);
+	}
 }
+
+void Viewer::timeout_slot()
+{
+	if (counter == setTime) {
+		
+		QMessageBox::warning(this, "timer", QString("時間到"));
+		timer->stop();
+		QMessageBox msg;
+		if (GameManager::currentPlayer % 2 == 0) {
+			msg.setText("黑方獲勝!");
+		}
+		else {
+			msg.setText("紅方獲勝!");
+		}
+		msg.exec();
+		//start = false;
+		saveGame_slot(0);
+		reset();
+	}
+	else {
+		counter++;
+		time_label->setText(QString("剩餘時間: %1 秒").arg(setTime-counter));
+	}
+	
+}
+
+

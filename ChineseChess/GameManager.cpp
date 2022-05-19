@@ -44,24 +44,30 @@ void GameManager::loadFile(string path)
         cout << input << endl;
         stringstream in(input);
         in >> nowX >> nowX >> nowY >> nextX >> nextY;
+
         for (int i = 0; i < Board::onBoard.size(); i++) {
+
             if (Board::onBoard[i]->getX() == nowX && Board::onBoard[i]->getY() == nowY) {
-                Board::onBoard[i]->canMove();
+                Board::onBoard[i]->canMove(0);
                 cout << "find!\n";
+
                 if (Board::board[nextX][nextY] != 0) {
                     
                     for (int j = 0; j < Board::onBoard.size(); j++) {
                         if (Board::onBoard[j]->getX() == nextX && Board::onBoard[j]->getY() == nextY) {
                             Board::onBoard[j]->alive = false;
-                            
                         }
                     }
                 }
+                
                 Board::onBoard[i]->move(nextX, nextY);
                 Board::onBoard[i]->makeLog(nowX, nowY);
                 Board::clearMove();
+                break;  //======================================================有更改
             }
+           
         }
+        
     }
     
     Board::clearMove();
@@ -96,7 +102,46 @@ bool GameManager::checkKing()
     }
 }
 
-//void GameManager::pushIn(Chess* ch)
-//{
-//   // b.pushIn(ch);
-//}
+//0519 提示將軍
+bool GameManager::isCheck()
+{
+    for (int i = 0; i < Board::onBoard.size(); i++)
+    {
+        if (currentPlayer % 2 == 0) // red   ( need check 
+        {
+            if (Board::onBoard[i]->color == -1 && Board::onBoard[i]->alive) // black chess
+            {
+                Board::onBoard[i]->canMove(1);
+                int x = Board::RKing->getX();
+                int y = Board::RKing->getY();
+
+                if (Board::virtualMove[x][y] == 1)
+                {
+                    return true;
+                }
+
+            }
+
+        }
+        else  // black
+        {
+            if (Board::onBoard[i]->color == 1 && Board::onBoard[i]->alive) // red chess
+            {
+                Board::onBoard[i]->canMove(1);
+                int x = Board::BKing->getX();
+                int y = Board::BKing->getY();
+
+                if (Board::virtualMove[x][y] == 1)
+                {
+                    return true;
+                }
+
+            }
+
+        }
+
+
+
+    }
+    return false;
+}

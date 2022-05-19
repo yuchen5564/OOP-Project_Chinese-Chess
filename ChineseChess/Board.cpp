@@ -3,6 +3,7 @@
 vector<Chess*> Board::onBoard;
 int Board::board[9][10] = { };
 int Board::move[9][10] = { };
+int Board::virtualMove[9][10] = { };
 Chess* Board::RKing = nullptr;
 Chess* Board::BKing = nullptr;
 
@@ -53,4 +54,28 @@ void Board::printMove()
 		}
 		cout << endl;
 	}
+}
+
+//0519 提示將軍功能
+
+void Board::clearVirtualMove()
+{
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 10; j++) {
+			Board::virtualMove[i][j] = 0;
+		}
+	}
+}
+
+void Board::printVirtualMove()
+{
+	cout << "virtual:\n";
+	for (int i = 0; i < 10; i++) {
+		if (i == 5) cout << "\n";
+		for (int j = 0; j < 9; j++) {
+			cout << virtualMove[j][i] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
 }

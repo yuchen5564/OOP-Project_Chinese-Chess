@@ -10,7 +10,7 @@ public:
     Chess();
     Chess(int x, int y ,int col,string src);
     virtual void move(int x, int y); //移動棋子
-    virtual void canMove(); //提示可移動位置 0515 ADD
+    virtual void canMove(int show); //提示可移動位置 0515 ADD
     int getX();
     int getY();
     int getIndex();
@@ -36,7 +36,7 @@ class King : public Chess
         King();
         King(int x, int y,int col ,string src);
         void move(int x, int y);
-        void canMove();
+        void canMove(int show);
 
 };
 
@@ -46,7 +46,7 @@ class Advisor : public Chess
         Advisor();
         Advisor(int x, int y,int col ,string src);
         void move(int x, int y);
-        void canMove();
+        void canMove(int show);
 };
 
 class Minister : public Chess
@@ -55,7 +55,7 @@ class Minister : public Chess
         Minister();
         Minister(int x, int y,int col ,string src);
         void move(int x, int y);
-        void canMove();
+        void canMove(int show);
 };
 
 class Horse : public Chess
@@ -64,7 +64,7 @@ class Horse : public Chess
         Horse();
         Horse(int x, int y,int col ,string src);
         void move(int x, int y);
-        void canMove();
+        void canMove(int show);
 };
 
 class Soldier : public Chess
@@ -73,7 +73,7 @@ class Soldier : public Chess
         Soldier();
         Soldier(int x, int y,int col ,string src);
         void move(int x, int y);
-        void canMove();
+        void canMove(int show);
 };
 class Chariot : public Chess
 {
@@ -81,7 +81,7 @@ class Chariot : public Chess
         Chariot();
         Chariot(int x, int y,int col ,string src);
         void move(int x, int y);
-        void canMove();
+        void canMove(int show);
 };
 
 class Cannon : public Chess
@@ -90,7 +90,7 @@ class Cannon : public Chess
         Cannon();
         Cannon(int x, int y,int col ,string src);
         void move(int x, int y);
-        void canMove();
+        void canMove(int show);
     private:
     bool skip=false;
 };
