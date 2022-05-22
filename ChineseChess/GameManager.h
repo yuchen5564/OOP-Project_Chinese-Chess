@@ -18,7 +18,9 @@ public:
     static int currentPlayer;
     //static bool 
     static bool checkKing();
-    static bool isCheck(); //提示將軍
+    static bool isCheck(int flag); //提示將軍
+    static void aiGame();
+    static bool stalemate(); //欠行
 private:
     vector<Chess*> onBoard;
     Board b;

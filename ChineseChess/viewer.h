@@ -33,6 +33,7 @@ public:
 	void mousePressEvent(QMouseEvent*);
 	void mouseMoveEvent(QMouseEvent*);
 	void reset();
+	void afterMove();
 
 public slots:
 	void startGame_slot();
@@ -41,6 +42,7 @@ public slots:
 	void surrender_slot();
 	void saveGame_slot(int f = 1);
 	void timeout_slot();
+	void startWithAI_slot();
 	//void timeEvent(QTimerEvent *event);
 
 private:
@@ -52,16 +54,20 @@ private:
 	QPushButton* loadBtn; //載入黨案
 	QPushButton* surrenderBtn; //投降
 	QPushButton* saveGameBtn; //存檔
+	QPushButton* aiBtn;
 
 	QLabel* title1; //封面標題
 	QLabel* click_label; //顯示點選位置
 	QLabel* nowPlayer_label;
 	QLabel* time_label;	
 	QLabel* checkKing_label;
+	QLabel* gameMode_label;
 
 	QTimer* timer;
 
 	bool start = false;
+	bool ai = false;
+
 	int xPos = 10, yPos = 10; //點擊位置
 
 	int counter = 0;

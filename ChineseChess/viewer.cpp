@@ -29,10 +29,11 @@ Viewer::~Viewer()
 void Viewer::menu() {
 
 	start = false;
+	ai = false;
 	timer->stop();
 
 	Board::clearMove();
-	setFixedSize(300, 250);
+	setFixedSize(300, 300);
 
 	title1 = new QLabel("中國象棋", this);
 	title1->setFont(QFont("微軟正黑體", 20));
@@ -46,20 +47,26 @@ void Viewer::menu() {
 	loadBtn->setGeometry(90, 130, 120, 40);
 	loadBtn->setFlat(0);
 
+	aiBtn = new QPushButton("人機對弈", this);
+	aiBtn->setGeometry(90, 180, 120, 40);
+	aiBtn->setFlat(0);
+
 	quitBtn = new QPushButton("結束遊戲", this);
-	quitBtn->setGeometry(90, 180, 120, 40);
+	quitBtn->setGeometry(90, 230, 120, 40);
 	quitBtn->setFlat(0);
 
 	title1->show();
 	startBtn->show();
 	loadBtn->show();
 	quitBtn->show();
+	aiBtn->show();
 
 	GameManager::restartGame();
 
 	connect(startBtn, SIGNAL(clicked(bool)), this, SLOT(startGame_slot()));
 	connect(quitBtn, SIGNAL(clicked(bool)), qApp, SLOT(quit()));
 	connect(loadBtn, SIGNAL(clicked(bool)), this, SLOT(loadFile_slot()));
+	connect(aiBtn, SIGNAL(clicked(bool)), this, SLOT(startWithAI_slot()));
 }
 
 //設定初始棋盤
@@ -75,6 +82,12 @@ void Viewer::setBoard() {
 
 	timer->start(1000);
 
+	gameMode_label = new QLabel(" ", this);
+	gameMode_label->setFont(QFont("微軟正黑體", 15));
+	gameMode_label->setGeometry(40, 1, 200, 30);
+	if (ai) gameMode_label->setText("目前模式：人機對弈");
+	else gameMode_label->setText("目前模式：一般");
+
 	click_label = new QLabel(" ", this);
 	click_label->setFont(QFont("微軟正黑體", 15));
 	click_label->setGeometry(1, 1, 150, 30);
@@ -86,7 +99,8 @@ void Viewer::setBoard() {
 	checkKing_label = new QLabel(" ", this);
 	checkKing_label->setFont(QFont("微軟正黑體", 25));
 	checkKing_label->setGeometry(550, 300, 150, 120);
-	checkKing_label->show();
+	if (ai) checkKing_label->setText(QString(" "));
+	
 
 	nowPlayer_label = new QLabel(" ", this);
 	if (GameManager::currentPlayer % 2 == 0) {
@@ -154,13 +168,15 @@ void Viewer::paintEvent(QPaintEvent*) {
             }
 
 		}
+
+		
+
 		update();
 	}
 }
 
 void Viewer::mousePressEvent(QMouseEvent* pos) {
 	if (start) {
-		//timeRecord->addSecs(1000);
 		//取得滑鼠位置
 		pos->globalPos();
 
@@ -170,11 +186,6 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				yPos = (pos->y() - 25) / 56;
 			}
 		}
-		
-		
-		
-		/*timeRecord->setHMS(0, 10, 0);*/
-		//time_label->setText(QString("%1").arg(timeRecord->toString("hh:mm:ss")));
 		click_label->setText(QString("%1, %2").arg(xPos).arg(yPos));
 
 		//=============================================================================
@@ -194,7 +205,7 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 			press++;
 		}
 		else if (press == 0) {
-
+			//Board::printVirtualMove();
 			for (int i = 0; i < Board::onBoard.size(); i++) {
 
 				//取出棋子位置
@@ -218,16 +229,20 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
             if (Board::board[nx][ny] == 0) { //移動位置為空 --> 移動棋子
 				
                 Board::onBoard[index]->move(nx, ny);
-				counter = -1;
-				timer->stop();
-				timer->start(1000);
-				
-
+				afterMove();
+			
+				//Board::clearVirtualMove();
 				Board::onBoard[index]->makeLog(tmpX, tmpY);
                 Board::clearMove();
                 //消除選取框
                 xPos = 10;
 				yPos = 10;
+
+				if (ai && GameManager::currentPlayer % 2 == 1) {
+					GameManager::aiGame();
+					//cout << GameManager::currentPlayer << endl;
+				}
+
 			}
             else if(Board::board[nx][ny] == Board::onBoard[index]->color*-1) //吃棋
             {
@@ -240,14 +255,15 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 
 						if (nx == tx && ny == ty && Board::onBoard[i]->alive) {
 							Board::onBoard[i]->alive = false;
+							Board::onBoard[i]->fakeAlive = false;
+
 
 						}
 					}
 					Board::onBoard[index]->move(nx, ny);
-					counter = -1;
-					timer->stop();
-					timer->start(1000);
-
+					afterMove();
+	
+					//Board::clearVirtualMove();
 					Board::onBoard[index]->makeLog(tmpX, tmpY);
 					
 				}
@@ -255,6 +271,10 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				//消除選取框
 				xPos = 10;
 				yPos = 10;
+				if (ai && GameManager::currentPlayer % 2 == 1) {
+					GameManager::aiGame();
+					//cout << GameManager::currentPlayer << endl;
+				}
             }
 			else { //移動位置有棋 --> 視為重新選定
 				Board::clearMove();
@@ -275,42 +295,24 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				}
 			}
 		}
-		if (!GameManager::checkKing()) {
-			QMessageBox msg;
-			if (GameManager::currentPlayer % 2 == 0) {
-				msg.setText("黑方獲勝!");
-			}
-			else {
-				msg.setText("紅方獲勝!");
-			}
-			msg.exec();
-			saveGame_slot();
-			reset();
-		}
+
+		//cout << "\n\nmousePressEvent:\n\n";
+		//Board::printBoard();
 
 		Board::clearVirtualMove();
-		if (GameManager::isCheck())
+		if (GameManager::isCheck(1))
 		{
-
-			checkKing_label->setText("<font color=red>注意!將軍!</font>");
+			//Board::printVirtualMove();
+			checkKing_label->setText(QString("<font color=red>注意!將軍!</font>"));
 
 		}
 		else
 		{
-			checkKing_label->setText(" ");
+			checkKing_label->setText(QString(" "));
 
 		}
-		Board::printVirtualMove();
-
-		if (GameManager::currentPlayer % 2 == 0) {
-			nowPlayer_label->setText(QString("現在輪到\n　紅方"));
-		}
-		else {
-			nowPlayer_label->setText(QString("現在輪到\n　黑方"));
-		}
+		Board::clearVirtualMove();
 	}
-
-	
 	//=============================================================================
 }
 
@@ -333,9 +335,13 @@ void Viewer::startGame_slot() {
 	startBtn->hide();
 	loadBtn->hide();
 	quitBtn->hide();
+	aiBtn->hide();
 
 	time_label->show();
-	time_label->setText(QString("剩餘時間: %1 秒").arg(setTime));
+	checkKing_label->show();
+	
+	gameMode_label->show();
+	time_label->setText(QString("<font color=black>剩餘時間: %1 秒</font>").arg(setTime));
 	counter =-1;
 
 	click_label->show();
@@ -348,16 +354,9 @@ void Viewer::startGame_slot() {
 
 void Viewer::reset()
 {
-	/*menu();
-	start = false;
-	restartBtn->hide();
-	click_label->hide();
-	nowPlayer_label->hide();
-	surrenderBtn->hide();
-	saveGameBtn->hide();*/
 	//0513 ADD
 	if (!(QMessageBox::information(this, tr("Info"), tr("是否再來一局?"), tr("再來一局"), tr("回到主畫面")))) {
-		counter = 0;
+		counter = -1;
 		GameManager::restartGame();
 		if (GameManager::currentPlayer % 2 == 0) {
 			nowPlayer_label->setText(QString("現在輪到\n　紅方"));
@@ -365,6 +364,7 @@ void Viewer::reset()
 		else {
 			nowPlayer_label->setText(QString("現在輪到\n　黑方"));
 		}
+		timer->start(1000);
 		
 	}
 	else {
@@ -372,14 +372,65 @@ void Viewer::reset()
 		click_label->hide();
 		time_label->hide();
 		checkKing_label->hide();
+		checkKing_label->setText(QString(" "));
+		gameMode_label->hide();
+		nowPlayer_label->hide();
 	}
+}
+
+//重設計時器、判斷結束、切換下棋方、判斷欠行
+void Viewer::afterMove()
+{
+	counter = -1;
+	timer->stop();
+	timer->start(1000);
+
+	
+	if (!GameManager::checkKing()) {
+		timer->stop();
+		QMessageBox msg;
+		if (GameManager::currentPlayer % 2 == 0) {
+			msg.setText("黑方獲勝!");
+		}
+		else {
+			msg.setText("紅方獲勝!");
+		}
+		msg.exec();
+		saveGame_slot(0);
+		reset();
+	}
+
+	if (GameManager::currentPlayer % 2 == 0) {
+		nowPlayer_label->setText(QString("現在輪到\n　紅方"));
+	}
+	else {
+		nowPlayer_label->setText(QString("現在輪到\n　黑方"));
+	}
+
+	Board::clearVirtualMove();
+	if (GameManager::stalemate() && start) {//move
+
+		cout << "is stalemate~\n";
+		timer->stop();
+		QMessageBox msg;
+		if (GameManager::currentPlayer % 2 == 0) {
+			msg.setText("紅方欠行，黑方獲勝!");
+		}
+		else {
+			msg.setText("黑方欠行，紅方獲勝!");
+		}
+		msg.exec();
+		saveGame_slot(0);
+		reset();
+	}
+	Board::clearVirtualMove();
 }
 
 void Viewer::restartGame_slot(int f) {
 	timer->stop();
 	if (!(QMessageBox::information(this, tr("Warning"), tr("是否確認重新開始遊戲?"), tr("Yes"), tr("No"))))
 	{
-		counter = 0;
+		counter = -1;
 		saveGame_slot();
 		GameManager::restartGame();
 		if (GameManager::currentPlayer % 2 == 0) {
@@ -388,6 +439,7 @@ void Viewer::restartGame_slot(int f) {
 		else {
 			nowPlayer_label->setText(QString("現在輪到\n　黑方"));
 		}
+		timer->start(1000);
 	}
 	else {
 		if(f == 1)timer->start(1000);
@@ -396,7 +448,7 @@ void Viewer::restartGame_slot(int f) {
 
 void Viewer::loadFile_slot()
 {
-	nowPlayer_label->setText(" ");
+	//nowPlayer_label->setText(" ");
 	GameManager::restartGame();
 	QString filePath = QFileDialog::getOpenFileName(NULL, QObject::tr("Open File"),
 		qApp->applicationDirPath(), QObject::tr("Text (*.txt)"));
@@ -411,6 +463,7 @@ void Viewer::loadFile_slot()
 		msg.exec();
 	}
 
+	//afterMove();
 	if (!GameManager::checkKing()) {
 		QMessageBox msg;
 		if (GameManager::currentPlayer % 2 == 0) {
@@ -487,9 +540,25 @@ void Viewer::timeout_slot()
 	}
 	else {
 		counter++;
-		time_label->setText(QString("剩餘時間: %1 秒").arg(setTime-counter));
+		if (setTime - counter < 10) {
+			time_label->setText(QString("<font color=red>剩餘時間: %1 秒</font>").arg(setTime-counter));
+		}
+		else {
+			time_label->setText(QString("<font color=black>剩餘時間: %1 秒</font>").arg(setTime - counter));
+		}
+		
 	}
 	
+}
+
+void Viewer::startWithAI_slot()
+{
+	GameManager::restartGame();
+	//Board::printVirtualMove();
+	ai = true;
+	startGame_slot();
+	GameManager::currentPlayer = 0;
+	//GameManager::aiGame();
 }
 
 

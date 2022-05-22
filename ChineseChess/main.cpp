@@ -81,7 +81,23 @@ int main(int argc, char* argv[])
 	game.pushIn(&ch33);
 	game.pushIn(&ch34);
 	game.pushIn(&ch35);
-	Board::printBoard();
+
+	/*King ch04(4, 0, -1, ":/ChineseChess/img/B_jiang.png");
+	King ch05(4, 9, 1, ":/ChineseChess/img/R_jiang.png");
+	Advisor ch06(3, 0, -1, ":/ChineseChess/img/B_shi.png");
+	Advisor ch07(5, 0, -1, ":/ChineseChess/img/B_shi.png");
+	Advisor ch08(3, 9, 1, ":/ChineseChess/img/R_shi.png");
+	Cannon ch34(1, 7, 1, ":/ChineseChess/img/R_pao.png");
+	Board::BKing = &ch04;
+	Board::RKing = &ch05;
+	game.pushIn(&ch04);
+	game.pushIn(&ch05);
+	game.pushIn(&ch06);
+	game.pushIn(&ch07);
+	game.pushIn(&ch08);
+	game.pushIn(&ch34);*/
+
+	//Board::printBoard();
 	game.showMenu();
 	return a.exec();
 }
