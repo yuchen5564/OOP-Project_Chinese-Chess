@@ -75,6 +75,8 @@ void Chess::resetChess()
     //Board::board[_x][_y] = 0;
     _x = firstX;
     _y = firstY;
+    fakeX = firstX;
+    fakeY = firstY;
     Board::board[_x][_y] = color;
     alive = true;
     fakeAlive = true;

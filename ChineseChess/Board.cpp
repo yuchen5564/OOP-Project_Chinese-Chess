@@ -33,6 +33,10 @@ void Board::resetBoard()
 			Board::board[i][j] = 0;
 		}
 	}
+	for (int i = 0; i < Board::onBoard.size(); i++) {
+		Board::onBoard[i]->alive = false;
+		Board::onBoard[i]->fakeAlive = false;
+	}
 }
 
 

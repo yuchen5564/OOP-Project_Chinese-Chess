@@ -226,7 +226,7 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 		if (press == 2) {
             press = 0;
             //Board::clearMove();
-            if (Board::board[nx][ny] == 0) { //移動位置為空 --> 移動棋子
+            if (Board::board[nx][ny] == 0 && Board::move[nx][ny] == 1) { //移動位置為空 --> 移動棋子
 				
                 Board::onBoard[index]->move(nx, ny);
 				afterMove();
@@ -240,11 +240,17 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 
 				if (ai && GameManager::currentPlayer % 2 == 1) {
 					GameManager::aiGame();
+					if (GameManager::currentPlayer % 2 == 0) {
+						nowPlayer_label->setText(QString("現在輪到\n　紅方"));
+					}
+					else {
+						nowPlayer_label->setText(QString("現在輪到\n　黑方"));
+					}
 					//cout << GameManager::currentPlayer << endl;
 				}
 
 			}
-            else if(Board::board[nx][ny] == Board::onBoard[index]->color*-1) //吃棋
+            else if(Board::board[nx][ny] == Board::onBoard[index]->color*-1 ) //吃棋
             {
 				if (Board::move[xPos][yPos] == 1) {
 					for (int i = 0; i < Board::onBoard.size(); i++)
@@ -273,10 +279,16 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 				yPos = 10;
 				if (ai && GameManager::currentPlayer % 2 == 1) {
 					GameManager::aiGame();
+					if (GameManager::currentPlayer % 2 == 0) {
+						nowPlayer_label->setText(QString("現在輪到\n　紅方"));
+					}
+					else {
+						nowPlayer_label->setText(QString("現在輪到\n　黑方"));
+					}
 					//cout << GameManager::currentPlayer << endl;
 				}
             }
-			else { //移動位置有棋 --> 視為重新選定
+			else { //移動位置有棋 --> 視為重新選定 && 不能移動(canMove!=1)
 				Board::clearMove();
 				for (int i = 0; i < Board::onBoard.size(); i++) {
 

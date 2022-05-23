@@ -23,8 +23,11 @@ void GameManager::showMenu(){
 
 void GameManager::restartGame()
 {
+    Board::clearVirtualMove();
+    Board::clearMove();
     Board::resetBoard();
     for (int i = 0; i < Board::onBoard.size(); i++)  {
+
         Board::onBoard[i]->resetChess();
     }
     GameManager::currentPlayer = 0;
@@ -36,6 +39,7 @@ void GameManager::restartGame()
 
 void GameManager::loadFile(string path)
 {
+    GameManager::restartGame();
     fstream file;
     file.open(path, ios::in);
     string input;
@@ -47,19 +51,20 @@ void GameManager::loadFile(string path)
         cout << input << endl;
         stringstream in(input);
         in >> nowX >> nowX >> nowY >> nextX >> nextY;
+        //cout << ">>>> " << nowX << " " << nowY << " " << nextX << " " << nextY << endl;
 
         for (int i = 0; i < Board::onBoard.size(); i++) {
 
-            if (Board::onBoard[i]->getX() == nowX && Board::onBoard[i]->getY() == nowY) {
+            if (Board::onBoard[i]->getX() == nowX && Board::onBoard[i]->getY() == nowY && Board::onBoard[i]->alive) {
                 Board::onBoard[i]->canMove(0);
                 cout << "find!\n";
 
                 if (Board::board[nextX][nextY] != 0) {
-                    
                     for (int j = 0; j < Board::onBoard.size(); j++) {
-                        if (Board::onBoard[j]->getX() == nextX && Board::onBoard[j]->getY() == nextY) {
+                        if (Board::onBoard[j]->getX() == nextX && Board::onBoard[j]->getY() == nextY && Board::onBoard[j]->alive) {
                             Board::onBoard[j]->alive = false;
                             Board::onBoard[j]->fakeAlive = false;
+                            break;
                         }
                     }
                 }
@@ -212,6 +217,9 @@ void GameManager::aiGame()
             count++;
         }
         if (count == randNum && Board::onBoard[i]->alive) {
+            int beforeX = Board::onBoard[i]->getX();
+            int beforeY = Board::onBoard[i]->getY();
+
             Board::onBoard[i]->canMove(0);
             //cout << "''''''''''''''''''''\n";
             //Board::printMove();
@@ -226,20 +234,28 @@ void GameManager::aiGame()
                 }
             }
             cout << list.size() << endl;
-            randNum = rand() % list.size();
-            //cout <<"--------------------------------------"<<randNum << " " << list[randNum].x << " " << list[randNum].y << endl;
-            if (Board::board[list[randNum].x][list[randNum].y] != 0) {
-                for (int j = 0; j < Board::onBoard.size(); j++) {
-                    if (Board::onBoard[j]->getX() == list[randNum].x && Board::onBoard[j]->getY() == list[randNum].y) {
-                        Board::onBoard[j]->alive = false;
-                        Board::onBoard[j]->fakeAlive = false;
-
+            if (list.size() == 0) {
+                randNum++;
+            }
+            else {
+                randNum = rand() % list.size();
+                //cout <<"--------------------------------------"<<randNum << " " << list[randNum].x << " " << list[randNum].y << endl;
+                if (Board::board[list[randNum].x][list[randNum].y] != 0) {
+                    for (int j = 0; j < Board::onBoard.size(); j++) {
+                        if (Board::onBoard[j]->getX() == list[randNum].x && Board::onBoard[j]->getY() == list[randNum].y 
+                            && Board::onBoard[j]->alive) {
+                            Board::onBoard[j]->alive = false;
+                            Board::onBoard[j]->fakeAlive = false;
+                            break;
+                        }
                     }
                 }
+                Board::onBoard[i]->move(list[randNum].x, list[randNum].y);
+                Board::onBoard[i]->makeLog(beforeX, beforeY);
+                Board::clearMove();
+                break;
             }
-            Board::onBoard[i]->move(list[randNum].x, list[randNum].y);
-            Board::clearMove();
-            break;
+            
         }
         else if(count == randNum && !Board::onBoard[i]->alive) {
             randNum++;
@@ -257,7 +273,7 @@ bool GameManager::stalemate()
     cout << "nowTurn : " << nowTurn << endl;
     for (int i = 0; i < Board::onBoard.size(); i++) {
         Board::clearMove();
-        if (Board::onBoard[i]->color == nowTurn) {
+        if (Board::onBoard[i]->color == nowTurn && Board::onBoard[i]->alive) {
             Board::onBoard[i]->canMove(0); //取得可移動位置
             vector<Position> list; //抓出所有可移動
             list.clear();
@@ -272,7 +288,7 @@ bool GameManager::stalemate()
                 int tmpIndex = -1;
                 if (Board::board[list[k].x][list[k].y] != 0) {
                     for (int j = 0; j < Board::onBoard.size(); j++) {
-                        if (Board::onBoard[j]->getX() == list[k].x && Board::onBoard[j]->getY() == list[k].y) {
+                        if (Board::onBoard[j]->getX() == list[k].x && Board::onBoard[j]->getY() == list[k].y && Board::onBoard[j]->alive) {
                             Board::onBoard[j]->fakeAlive = false;
                             tmpIndex = j;
                         }
@@ -281,23 +297,23 @@ bool GameManager::stalemate()
 
                 Board::onBoard[i]->fakeMove(list[k].x, list[k].y, 0); //移動到下一點
                 
-                //cout << "===========================\n";
-               // cout << "real:" << Board::onBoard[i]->getX() << " " << Board::onBoard[i]->getY() << endl;
-               // cout << "fake:" << Board::onBoard[i]->getFakeX() << " " << Board::onBoard[i]->getFakeY() << endl;
+                cout << "===========================\n";
+                cout << "real:" << Board::onBoard[i]->getX() << " " << Board::onBoard[i]->getY() << endl;
+                cout << "fake:" << Board::onBoard[i]->getFakeX() << " " << Board::onBoard[i]->getFakeY() << endl;
                // cout << "BKing fake:" << Board::BKing->getFakeX()  << endl;
                // cout << "RKing fake:" << Board::RKing->getFakeX()  << endl;
                 //Board::printBoard();
                 //cout<<Board::virtualMove
                 //Board::printVirtualMove();
                 if (!isCheck(0)) {
-                    //Board::printVirtualMove();
+                    Board::printVirtualMove();
                     Board::onBoard[i]->fakeMove(Board::onBoard[i]->getX(), Board::onBoard[i]->getY(), col); 
                     if (tmpIndex != -1) Board::onBoard[tmpIndex]->fakeAlive = true;
                     Board::clearVirtualMove();
                     return false;
                 }
                 else {
-                    //Board::printVirtualMove();
+                    Board::printVirtualMove();
                     Board::onBoard[i]->fakeMove(Board::onBoard[i]->getX(), Board::onBoard[i]->getY(),col );
                     if (tmpIndex != -1) Board::onBoard[tmpIndex]->fakeAlive = true;
                     Board::clearVirtualMove();
