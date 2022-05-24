@@ -216,6 +216,7 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
                 if (xPos == tmpX && yPos == tmpY && Board::onBoard[i]->alive
 					&& nowPlayer == Board::onBoard[i]->color) {	//第一次抓取位置
 					Board::onBoard[i]->canMove(0);
+					//Board::printMove();
 					index = i;
 					press++;
 					break;
@@ -229,10 +230,11 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
             if (Board::board[nx][ny] == 0 && Board::move[nx][ny] == 1) { //移動位置為空 --> 移動棋子
 				
                 Board::onBoard[index]->move(nx, ny);
-				afterMove();
+				
 			
 				//Board::clearVirtualMove();
 				Board::onBoard[index]->makeLog(tmpX, tmpY);
+				afterMove();
                 Board::clearMove();
                 //消除選取框
                 xPos = 10;
@@ -267,11 +269,11 @@ void Viewer::mousePressEvent(QMouseEvent* pos) {
 						}
 					}
 					Board::onBoard[index]->move(nx, ny);
-					afterMove();
+					
 	
 					//Board::clearVirtualMove();
 					Board::onBoard[index]->makeLog(tmpX, tmpY);
-					
+					afterMove();
 				}
 				Board::clearMove();
 				//消除選取框
@@ -377,7 +379,7 @@ void Viewer::reset()
 			nowPlayer_label->setText(QString("現在輪到\n　黑方"));
 		}
 		timer->start(1000);
-		
+		counter = -1;
 	}
 	else {
 		menu();
@@ -473,10 +475,12 @@ void Viewer::loadFile_slot()
 		msg.setText("Load File Success!");
 		startGame_slot();
 		msg.exec();
+		afterMove();
+		Board::clearMove();
 	}
 
-	//afterMove();
-	if (!GameManager::checkKing()) {
+	
+	/*if (!GameManager::checkKing()) {
 		QMessageBox msg;
 		if (GameManager::currentPlayer % 2 == 0) {
 			msg.setText("黑方獲勝!");
@@ -486,7 +490,7 @@ void Viewer::loadFile_slot()
 		}
 		msg.exec();
 		reset();
-	}
+	}*/
 	
 }
 
@@ -526,9 +530,11 @@ void Viewer::saveGame_slot(int f)
 		QMessageBox msg;
 		msg.setText("存檔成功！\n檔案已存放至：\n目前目錄\\save\\" + str + ".txt");
 		msg.exec();
+		timer->start(1000);
 	}
 	else {
-		if(f == 1) timer->start(1000);
+		if (f == 1) timer->start(1000);
+		else if (start) timer->start(1000);
 	}
 }
 

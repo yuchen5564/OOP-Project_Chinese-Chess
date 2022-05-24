@@ -1671,6 +1671,10 @@ void Cannon::canMove(int show)
                 {
                     skip = true;//發現中間的棋子
                 }
+                else if (_x + x <= 8 && Board::board[_x + x][_y] == 1 && skip)
+                {
+                    break;
+                }
                 else if (_x + x <= 8 && Board::board[_x + x][_y] == -1 && skip)
                 {
                     Board::move[_x + x][_y] = 1;//可以殺的旗子
@@ -1687,6 +1691,10 @@ void Cannon::canMove(int show)
                 else  if (_x - x >= 0 && Board::board[_x - x][_y] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
+                }
+                else if (_x - x >= 0 && Board::board[_x - x][_y] == 1 && skip)
+                {
+                    break;
                 }
                 else if (_x - x >= 0 && Board::board[_x - x][_y] == -1 && skip)
                 {
@@ -1705,6 +1713,10 @@ void Cannon::canMove(int show)
                 {
                     skip = true;//發現中間的棋子
                 }
+                else if (_y + x <= 9 && Board::board[_x][_y + x] == 1 && skip)
+                {
+                    break;
+                }
                 else  if (_y + x <= 9 && Board::board[_x][_y + x] == -1 && skip)
                 {
                     Board::move[_x][_y + x] = 1;//可以殺的旗子
@@ -1721,6 +1733,10 @@ void Cannon::canMove(int show)
                 else  if (_y - x >= 0 && Board::board[_x][_y - x] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
+                }
+                else if (_y - x >= 0 && Board::board[_x][_y - x] == 1 && skip)
+                {
+                    break;
                 }
                 else if (_y - x >= 0 && Board::board[_x][_y - x] == -1 && skip)
                 {
@@ -1742,6 +1758,10 @@ void Cannon::canMove(int show)
                 {
                     skip = true;//發現中間的棋子
                 }
+                else if (_x + x <= 8 && Board::board[_x + x][_y] == -1 && skip)
+                {
+                    break;
+                }
                 else if (_x + x <= 8 && Board::board[_x + x][_y] == 1 && skip)
                 {
                     Board::move[_x + x][_y] = 1;//可以殺的旗子
@@ -1758,6 +1778,10 @@ void Cannon::canMove(int show)
                 else  if (_x - x >= 0 && Board::board[_x - x][_y] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
+                }
+                else if (_x - x >= 0 && Board::board[_x - x][_y] == -1 && skip)
+                {
+                    break;
                 }
                 else if (_x - x >= 0 && Board::board[_x - x][_y] == 1 && skip)
                 {
@@ -1776,6 +1800,10 @@ void Cannon::canMove(int show)
                 {
                     skip = true;//發現中間的棋子
                 }
+                else if (_y + x <= 9 && Board::board[_x][_y + x] == -1 && skip)
+                {
+                    break;
+                }
                 else  if (_y + x <= 9 && Board::board[_x][_y + x] == 1 && skip)
                 {
                     Board::move[_x][_y + x] = 1;//可以殺的旗子
@@ -1793,6 +1821,10 @@ void Cannon::canMove(int show)
                 {
                     skip = true;//發現中間的棋子
                 }
+                else if (_y - x >= 0 && Board::board[_x][_y - x] == -1 && skip)
+                {
+                    break;
+                }
                 else if (_y - x >= 0 && Board::board[_x][_y - x] == 1 && skip)
                 {
                     Board::move[_x][_y - x] = 1;//可以殺的旗子
@@ -1808,68 +1840,84 @@ void Cannon::canMove(int show)
             skip = false;//判斷跳躍(尚未)
             for (int x = 1; x <= 8; x++)
             {
-                if (_x + x <= 8 && Board::board[_x + x][fakeY] == 0 && !skip)
+                if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] == 0 && !skip)
                 {
-                    Board::virtualMove[_x + x][fakeY] = 1;
+                    Board::virtualMove[fakeX + x][fakeY] = 1;
                 }
-                else  if (_x + x <= 8 && Board::board[_x + x][fakeY] != 0 && !skip)
+                else  if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else if (_x + x <= 8 && Board::board[_x + x][fakeY] == -1 && skip)
+                else if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] == 1 && skip)
                 {
-                    Board::virtualMove[_x + x][fakeY] = 1;//可以殺的旗子
+                    break;
+                }
+                else if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] == -1 && skip)
+                {
+                    Board::virtualMove[fakeX + x][fakeY] = 1;//可以殺的旗子
                     break;
                 }
             }
             skip = false;
             for (int x = 1; x <= 8; x++)
             {
-                if (_x - x >= 0 && Board::board[_x - x][fakeY] == 0 && !skip)
+                if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] == 0 && !skip)
                 {
-                    Board::virtualMove[_x - x][fakeY] = 1;
+                    Board::virtualMove[fakeX - x][fakeY] = 1;
                 }
-                else  if (_x - x >= 0 && Board::board[_x - x][fakeY] != 0 && !skip)
+                else  if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else if (_x - x >= 0 && Board::board[_x - x][fakeY] == -1 && skip)
+                else if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] == 1 && skip)
                 {
-                    Board::virtualMove[_x - x][fakeY] = 1;//可以殺的旗子
+                    break;
+                }
+                else if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] == -1 && skip)
+                {
+                    Board::virtualMove[fakeX - x][fakeY] = 1;//可以殺的旗子
                     break;
                 }
             }
             skip = false;
             for (int x = 1; x <= 9; x++)
             {
-                if (fakeY + x <= 9 && Board::board[_x][fakeY + x] == 0 && !skip)
+                if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] == 0 && !skip)
                 {
-                    Board::virtualMove[_x][fakeY + x] = 1;
+                    Board::virtualMove[fakeX][fakeY + x] = 1;
                 }
-                else  if (fakeY + x <= 9 && Board::board[_x][fakeY + x] != 0 && !skip)
+                else  if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else  if (fakeY + x <= 9 && Board::board[_x][fakeY + x] == -1 && skip)
+                else if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] == 1 && skip)
                 {
-                    Board::virtualMove[_x][fakeY + x] = 1;//可以殺的旗子
+                    break;
+                }
+                else  if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] == -1 && skip)
+                {
+                    Board::virtualMove[fakeX][fakeY + x] = 1;//可以殺的旗子
                     break;
                 }
             }
             skip = false;
             for (int x = 1; x <= 9; x++)
             {
-                if (fakeY - x >= 0 && Board::board[_x][fakeY - x] == 0 && !skip)
+                if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] == 0 && !skip)
                 {
-                    Board::virtualMove[_x][fakeY - x] = 1;
+                    Board::virtualMove[fakeX][fakeY - x] = 1;
                 }
-                else  if (fakeY - x >= 0 && Board::board[_x][fakeY - x] != 0 && !skip)
+                else  if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else if (fakeY - x >= 0 && Board::board[_x][fakeY - x] == -1 && skip)
+                else if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] == 1 && skip)
                 {
-                    Board::virtualMove[_x][fakeY - x] = 1;//可以殺的旗子
+                    break;
+                }
+                else if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] == -1 && skip)
+                {
+                    Board::virtualMove[fakeX][fakeY - x] = 1;//可以殺的旗子
                     break;
                 }
             }
@@ -1879,68 +1927,84 @@ void Cannon::canMove(int show)
             skip = false;//判斷跳躍(尚未)
             for (int x = 1; x <= 8; x++)
             {
-                if (_x + x <= 8 && Board::board[_x + x][fakeY] == 0 && !skip)
+                if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] == 0 && !skip)
                 {
-                    Board::virtualMove[_x + x][fakeY] = 1;
+                    Board::virtualMove[fakeX + x][fakeY] = 1;
                 }
-                else  if (_x + x <= 8 && Board::board[_x + x][fakeY] != 0 && !skip)
+                else  if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else if (_x + x <= 8 && Board::board[_x + x][fakeY] == 1 && skip)
+                else if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] == -1 && skip)
                 {
-                    Board::virtualMove[_x + x][fakeY] = 1;//可以殺的旗子
+                    break;
+                }
+                else if (fakeX + x <= 8 && Board::board[fakeX + x][fakeY] == 1 && skip)
+                {
+                    Board::virtualMove[fakeX + x][fakeY] = 1;//可以殺的旗子
                     break;
                 }
             }
             skip = false;
             for (int x = 1; x <= 8; x++)
             {
-                if (_x - x >= 0 && Board::board[_x - x][fakeY] == 0 && !skip)
+                if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] == 0 && !skip)
                 {
-                    Board::virtualMove[_x - x][fakeY] = 1;
+                    Board::virtualMove[fakeX - x][fakeY] = 1;
                 }
-                else  if (_x - x >= 0 && Board::board[_x - x][fakeY] != 0 && !skip)
+                else  if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else if (_x - x >= 0 && Board::board[_x - x][fakeY] == 1 && skip)
+                else if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] == -1 && skip)
                 {
-                    Board::virtualMove[_x - x][fakeY] = 1;//可以殺的旗子
+                    break;
+                }
+                else if (fakeX - x >= 0 && Board::board[fakeX - x][fakeY] == 1 && skip)
+                {
+                    Board::virtualMove[fakeX - x][fakeY] = 1;//可以殺的旗子
                     break;
                 }
             }
             skip = false;
             for (int x = 1; x <= 9; x++)
             {
-                if (fakeY + x <= 9 && Board::board[_x][fakeY + x] == 0 && !skip)
+                if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] == 0 && !skip)
                 {
-                    Board::virtualMove[_x][fakeY + x] = 1;
+                    Board::virtualMove[fakeX][fakeY + x] = 1;
                 }
-                else  if (fakeY + x <= 9 && Board::board[_x][fakeY + x] != 0 && !skip)
+                else  if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else  if (fakeY + x <= 9 && Board::board[_x][fakeY + x] == 1 && skip)
+                else if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] == -1 && skip)
                 {
-                    Board::virtualMove[_x][fakeY + x] = 1;//可以殺的旗子
+                    break;
+                }
+                else  if (fakeY + x <= 9 && Board::board[fakeX][fakeY + x] == 1 && skip)
+                {
+                    Board::virtualMove[fakeX][fakeY + x] = 1;//可以殺的旗子
                     break;
                 }
             }
             skip = false;
             for (int x = 1; x <= 9; x++)
             {
-                if (fakeY - x >= 0 && Board::board[_x][fakeY - x] == 0 && !skip)
+                if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] == 0 && !skip)
                 {
-                    Board::virtualMove[_x][fakeY - x] = 1;
+                    Board::virtualMove[fakeX][fakeY - x] = 1;
                 }
-                else  if (fakeY - x >= 0 && Board::board[_x][fakeY - x] != 0 && !skip)
+                else  if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] != 0 && !skip)
                 {
                     skip = true;//發現中間的棋子
                 }
-                else if (fakeY - x >= 0 && Board::board[_x][fakeY - x] == 1 && skip)
+                else if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] == -1 && skip)
                 {
-                    Board::virtualMove[_x][fakeY - x] = 1;//可以殺的旗子
+                    break;
+                }
+                else if (fakeY - x >= 0 && Board::board[fakeX][fakeY - x] == 1 && skip)
+                {
+                    Board::virtualMove[fakeX][fakeY - x] = 1;//可以殺的旗子
                     break;
                 }
             }
