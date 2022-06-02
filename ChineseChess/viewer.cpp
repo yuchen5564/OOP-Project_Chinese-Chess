@@ -534,7 +534,7 @@ void Viewer::saveGame_slot(int f)
 	}
 	else {
 		if (f == 1) timer->start(1000);
-		else if (start) timer->start(1000);
+		else if (start && f!=0) timer->start(1000);
 	}
 }
 
